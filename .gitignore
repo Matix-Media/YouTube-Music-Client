@@ -1,9 +1,6 @@
 #Node things
-/node_modules/
-/build/
-
-#IDEA things
-/.idea/
+node_modules/
 
 #Electron dist
-/youtubemusic-win32-x64/
+dist/
+dist_old/

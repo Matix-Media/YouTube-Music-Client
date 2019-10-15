@@ -1,39 +1,87 @@
 {
-  "name": "youtubemusic",
-  "version": "1.0.0",
-  "description": "YouTube Music Client with Discord RPC support",
-  "main": "start.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
-  },
-  "keywords": [
-    "youtube",
-    "music",
-    "client",
-    "discord",
-    "rpc",
-    "rich",
-    "presence"
-  ],
-  "author": "AymanDev",
-  "license": "MIT",
-  "devDependencies": {
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
-    "electron-packager": "^13.0.1"
-  },
-  "dependencies": {
-    "asar": "^0.14.6",
-    "discord-rpc": "^3.0.1",
-    "discord.js": "^11.4.2",
-    "electron": "^3.0.5",
-    "electron-builder": "^20.38.4"
-  },
-  "appId": "youtube.music",
-  "mac": {
-    "category": "youtube.music"
-  }
+	"name": "youtube_music_client",
+	"version": "1.0.1",
+	"description": "YouTube Music Client with Discord RPC support",
+	"main": "main.js",
+	"scripts": {
+		"test": "yarn lint",
+		"lint": "eslint *.js",
+		"lint:fix": "eslint --fix *.js",
+		"start": "electron .",
+		"pack": "electron-builder --dir",
+		"dist:mac": "electron-builder --mac",
+		"dist:win": "electron-builder --win --x64 --ia32",
+		"dist:win32": "electron-builder --win --ia32",
+		"dist:win64": "electron-builder --win --x64",
+		"dist:mw": "yarn dist:win && yarn dist:mac",
+		"dist:linux": "electron-builder --linux --x64 --ia32",
+		"dist": "yarn dist:mw && yarn dist:linux",
+		"postinstall": "electron-builder install-app-deps"
+	},
+	"keywords": [
+		"youtube",
+		"music",
+		"client",
+		"discord",
+		"rpc",
+		"rich",
+		"presence"
+	],
+	"author": "AymanDev",
+	"contributors": [
+		"BigBrainAFK"
+	],
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/BigBrainAFK/YouTube-Music-Client/issues"
+	},
+	"homepage": "https://github.com/BigBrainAFK/YouTube-Music-Client",
+	"devDependencies": {
+		"electron": "^6.0.12",
+		"electron-builder": "^21.2.0",
+		"eslint": "^6.5.1"
+	},
+	"dependencies": {
+		"discord-rpc": "discordjs/RPC",
+		"discord.js": "discordjs/discord.js"
+	},
+	"engines": {
+		"node": ">=10.0.0"
+	},
+	"build": {
+		"productName": "YouTube-Music-Client",
+		"appId": "youtube.music.client",
+		"mac": {
+			"category": "youtube.music.client",
+			"icon": "assets/build/osx/icon.icns",
+			"target": [
+				"zip",
+				"dmg"
+			]
+		},
+		"win": {
+			"icon": "assets/build/win/icon.ico"
+		},
+		"nsis": {
+			"artifactName": "${productName}-Setup-${version}.${ext}",
+			"perMachine": true
+		},
+		"linux": {
+			"target": "AppImage",
+			"icon": "assets/build/linux/icon_2048x2048.png",
+			"synopsis": "Small YouTube Music App with DiscordRPC integration",
+			"description": "A small Electron app for YouTube Music which also integrates with Discord using its RPC functionallity",
+			"maintainer": "BigBrainAFK",
+			"category": "Multimedia"
+		},
+		"files": [
+			"**/*",
+			"!dist/*",
+			"!dist_old/*"
+		],
+		"directories": {
+			"buildResources": "assets/*",
+			"output": "dist"
+		}
+	}
 }

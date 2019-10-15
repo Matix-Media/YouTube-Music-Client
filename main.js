@@ -1,107 +1,159 @@
 'use strict';
 const DiscordRPC = require('discord-rpc');
-const {app, BrowserWindow, Menu, remote} = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 
-const clientId = '503099918488043520';
-
+function executeJavaScript(code) {
+	return new Promise(resolve => {
+		win.webContents.executeJavaScript(code, resolve);
+	});
+}
 let win;
 const menuTemplate = [
-  {
-    label: "Interface",
-    submenu: [
-      {role: "Reload"}
-    ]
-  }
+	{
+		label: 'Interface',
+		submenu: [
+			{ role: 'Reload' },
+		],
+	},
 ];
 
 function createWindow() {
-  // Create the browser window.
-  win = new BrowserWindow({width: 800, height: 700});
-  win.setMinimumSize(300, 300);
-  win.setSize(800, 700);
-  win.setResizable(true);
-  //win.openDevTools();
-  const menu = Menu.buildFromTemplate(menuTemplate);
-  Menu.setApplicationMenu(menu);
-  // and load the index.html of the app.
-  win.loadURL('https://music.youtube.com/');
-  win.on('closed', () => {
-    win = null;
-  });
-
+	// Create the browser window.
+	win = new BrowserWindow({ width: 800, height: 700 });
+	win.setMinimumSize(300, 300);
+	win.setSize(800, 700);
+	win.setResizable(true);
+	const menu = Menu.buildFromTemplate(menuTemplate);
+	Menu.setApplicationMenu(menu);
+	win.setMenuBarVisibility(false);
+	win.loadURL('https://music.youtube.com/');
+	win.on('closed', () => {
+		win = null;
+	});
+	win.on('page-title-updated', (e, title) => {
+		win.setTitle(`${title} - v${require('./package.json').version}`);
+		e.preventDefault();
+	});
 }
 
 app.on('ready', createWindow);
 
-// Quit when all windows are closed.
 app.on('window-all-closed', () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+	app.quit();
 });
 
 app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (win === null) {
-    createWindow()
-  }
+	if (win === null) {
+		createWindow();
+	}
 });
 
-// only needed for discord allowing spectate, join, ask to join
+function getContent() {
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		let title,
+			artist,
+			time,
+			paused,
+			result;
+
+		result =
+			await executeJavaScript('document.querySelector(\'div.content-info-wrapper yt-formatted-string.title\').title;');
+		if (!result) return reject('Error grabbing title');
+		title = result;
+
+		result = await executeJavaScript('document.querySelector(\'span.subtitle yt-formatted-string.byline\').title;');
+		if (!result) return reject('Error grabbing artist');
+		artist = result.split(' • ');
+
+		result = await executeJavaScript('document.querySelector(\'span.time-info\').textContent;');
+		if (!result) return reject('Error grabbing time');
+		time = result.replace(/\s{1,}/g, '').split('/').map(e =>
+			e.split(':').reduce((acc, seconds) => (60 * acc) + +seconds)
+		);
+
+		result = await executeJavaScript('document.querySelector(\'paper-icon-button.play-pause-button\').title;');
+		if (!result) return reject('Error grabbing time');
+		paused = result !== 'Pause';
+
+		return resolve({ title, artist, time, paused });
+	});
+}
+
+const clientId = '633709502784602133';
 DiscordRPC.register(clientId);
 
-const rpc = new DiscordRPC.Client({transport: 'ipc'});
-let startTimestamp = new Date();
-let prevInfo = '';
-let prevArgs = [];
+const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+let startTimestamp = new Date(),
+	endTimestamp,
+	prevSong;
 
-function setActivity() {
-  if (!rpc || !win) {
-    return;
-  }
-  const args = win.getTitle().split(' - ');
-  let smallImage = 'play';
-  let details = args[0];
-  let state = args[1];
-  let smallImageText = 'Listening';
+async function setActivity() {
+	if (!rpc || !win) {
+		return;
+	}
 
-  if (prevInfo !== win.getTitle()) {
-    prevInfo = win.getTitle();
+	// eslint-disable-next-line no-empty-function
+	const { title, artist, time, paused } = await getContent().catch(() => {}) ||
+		{
+			title: undefined,
+			artist: undefined,
+			time: undefined,
+			paused: undefined,
+		};
+	const now = new Date();
 
-    if (args.length > 1) {
-      prevArgs = args;
-      startTimestamp = new Date(); 
-    }
-  }
+	let details,
+		state,
+		smallImageKey,
+		smallImageText;
 
-  if (args.length < 2) {
-    smallImage = 'pause';
-    smallImageText = 'Paused';
-    details = prevArgs[0];
-    state = prevArgs[1];
-  }
+	if (!title && !artist) {
+		details = 'Browsing';
+		smallImageKey = undefined;
+		smallImageText = 'Browsing';
+	} else {
+		startTimestamp = now - (time[0] * 1000);
+		endTimestamp = startTimestamp + (time[1] * 1000);
+		details = title;
+		state = `${artist[0]} • ${artist[1]} (${artist[2]})`;
 
-  rpc.setActivity({
-    details: details,
-    state: state,
-    startTimestamp,
-    largeImageKey: 'youtubemusic_logo',
-    largeImageText: 'YouTube Music',
-    smallImageKey: smallImage,
-    smallImageText: smallImageText,
-    instance: false,
-  });
+		if (paused) {
+			smallImageKey = 'pause';
+			smallImageText = 'Paused';
+		} else 	if (prevSong !== { title, artist }) {
+			prevSong = { title, artist };
+
+			smallImageKey = 'play';
+			smallImageText = 'Listening';
+		}
+	}
+
+	const activity = {
+		details,
+		state,
+		startTimestamp,
+		largeImageKey: 'youtube-music-logo',
+		largeImageText: 'YouTube Music',
+		smallImageKey,
+		smallImageText,
+		instance: false,
+	};
+
+	if (endTimestamp) activity.endTimestamp = endTimestamp;
+
+	rpc.setActivity(activity);
+}
+
+function reconnect() {
+	rpc.connect();
 }
 
 rpc.on('ready', () => {
-  setActivity();
-  // activity can only be set every 15 seconds
-  setInterval(() => {
-    setActivity();
-  }, 15e3);
+	setActivity();
+	setInterval(setActivity, 15e3);
+	setInterval(reconnect, 1e3);
 });
 
-rpc.login({clientId}).catch(console.error);
+// eslint-disable-next-line no-console
+rpc.login({ clientId }).catch(console.error);

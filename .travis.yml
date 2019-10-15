@@ -1,0 +1,49 @@
+sudo: false
+
+language: node_js
+node_js: "10"
+
+cache:
+  directories:
+    - node_modules
+    - app/node_modules
+    - $HOME/.cache/electron
+    - $HOME/.cache/electron-builder
+    - $HOME/.npm/_prebuilds
+
+env:
+  global:
+    - ELECTRON_CACHE=$HOME/.cache/electron
+    - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+
+jobs:
+  include:
+    - stage: Test
+      script: yarn test
+    - stage: Deploy Windows & Mac
+      if: tag IS present
+      os: osx
+      osx_image: xcode10.2
+      script: 
+        - yarn dist:mw
+        - ls dist/
+      before_cache: rm -rf $HOME/.cache/electron-builder/wine
+    - stage: Deploy Linux
+      if: tag IS present
+      os: linux
+      dist: xenial
+      script: 
+        - yarn dist:linux
+        - ls dist/
+
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "CQEV0xMIgFp5nxiWbzNFV1l+QHMBJ/rKaLmCckleU0sCtnwrTxiHETL4XCAgvHtTDH66vJPXIXoKXiQTH/5DDZqBxshUy6YaRpt1ttBJBzjX8ACXH3V85Gs9GV3o5nr5dbCRQnCpV1niFgLr0eViFkz07oa7pQ2keVmkZU2nJgL/2C0/bCxsdJE4kpowmCHAZBDUE3B8Keq49IXmrGpxOCFngMzuFD/5SMhnOoqMHxbzQk4GEq0mVksm5UYx8cFimDw0wGuPPPWle9wh+/vH3A3zOKn1K8cBiklWp6Q8dqjo+HcRT2Z4so5T600DeU2FRpYj6jcINb8kZDbdVHWI+MTvs/CeIbHpLj0obCLhFxtYuQ9eBcjjy3F0dU3G1g2eoaowBMID/9CdMEUmbQAOluW9vSzlYxiZ37ZJXqxsJlAeh297VdXYGQXp6LlapOJkOiEeib0GRP+M2nhHpQley85CAFoAWsZtyqlrMVvK169HMmw7SrPNep/TRxloknVRexKGY+85NWC4xiR1GyQXbrlR8/Nks86rv98/DhBZdt/A0zPw2KLWsBCwiGo8ylq8/4IWS2zPsrXg2JH7CgktxyzbPclG/IR31LUVS1ItmSFW3YNysfEwfv4DfCFHL8Q9Chh3LukyRfG8ykPbrnEXtSXNjSM3wF5dX5DZydYAkGw="
+  file_glob: true
+  file: "dist/YouTube Music Client*.{zip,exe,AppImage,dmg}"
+  skip_cleanup: true
+  on:
+    tags: true
+  draft: true
