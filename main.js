@@ -1,6 +1,7 @@
 'use strict';
 const DiscordRPC = require('discord-rpc');
 const { app, BrowserWindow, Menu } = require('electron');
+let reconnectTimer;
 
 function executeJavaScript(code) {
 	return new Promise(resolve => {
@@ -83,7 +84,7 @@ function getContent() {
 const clientId = '633709502784602133';
 DiscordRPC.register(clientId);
 
-const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+let rpc = new DiscordRPC.Client({ transport: 'ipc' });
 let startTimestamp = new Date(),
 	endTimestamp,
 	prevSong;
@@ -145,14 +146,25 @@ async function setActivity() {
 	rpc.setActivity(activity);
 }
 
+rpc.once('disconnected', () => {
+	rpc = null;
+	reconnectTimer = setInterval(reconnect, 5e3);
+});
+
 function reconnect() {
-	rpc.connect();
+	rpc = new DiscordRPC.Client({ transport: 'ipc' });
+	DiscordRPC.register(clientId);
+	rpc.login({ clientId }).then(() => {
+		clearInterval(reconnectTimer);
+	}).catch(err => {
+		rpc = null;
+		console.error(err);
+	});
 }
 
 rpc.on('ready', () => {
 	setActivity();
 	setInterval(setActivity, 15e3);
-	setInterval(reconnect, 1e3);
 });
 
 // eslint-disable-next-line no-console
