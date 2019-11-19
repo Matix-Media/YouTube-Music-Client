@@ -70,8 +70,7 @@ function getContent() {
 		result = await executeJavaScript('document.querySelector(\'span.time-info\').textContent;');
 		if (!result) return reject('Error grabbing time');
 		time = result.replace(/\s{1,}/g, '').split('/').map(e =>
-			e.split(':').reduce((acc, seconds) => (60 * acc) + +seconds)
-		);
+			e.split(':').reduce((acc, seconds) => (60 * acc) + seconds));
 
 		result = await executeJavaScript('document.querySelector(\'paper-icon-button.play-pause-button\').title;');
 		if (!result) return reject('Error grabbing time');
