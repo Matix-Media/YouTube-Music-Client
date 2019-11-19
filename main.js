@@ -116,7 +116,7 @@ async function setActivity() {
 		startTimestamp = now - (time[0] * 1000);
 		endTimestamp = startTimestamp + (time[1] * 1000);
 		details = title;
-		state = `${artist[0]} • ${artist[1]} (${artist[2]})`;
+		state = `${artist[0] || 'Unknown'} • ${artist[1] || 'Unknown'} (${artist[2] || 'Unknown'})`;
 
 		if (paused) {
 			smallImageKey = 'pause';
