@@ -5,7 +5,7 @@ let reconnectTimer;
 
 function executeJavaScript(code) {
 	return new Promise(resolve => {
-		win.webContents.executeJavaScript(code, resolve);
+		win.webContents.executeJavaScript(code).then(data => resolve(data));
 	});
 }
 let win;
