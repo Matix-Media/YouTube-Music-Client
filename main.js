@@ -1,13 +1,17 @@
 'use strict';
 const DiscordRPC = require('discord-rpc');
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, nativeImage } = require('electron');
+const path = require('path');
 let reconnectTimer;
+
+const resourcePath = process.platform === 'darwin' ? 'Contents/Resources' : 'resources';
 
 function executeJavaScript(code) {
 	return new Promise(resolve => {
 		win.webContents.executeJavaScript(code).then(data => resolve(data));
 	});
 }
+
 let win;
 const menuTemplate = [
 	{
@@ -17,6 +21,10 @@ const menuTemplate = [
 		],
 	},
 ];
+
+if (process.platform === 'darwin') {
+	menuTemplate.unshift({});
+}
 
 function createWindow() {
 	// Create the browser window.
@@ -56,6 +64,7 @@ function getContent() {
 			artist,
 			time,
 			paused,
+			isFirst,
 			result;
 
 		result =
@@ -76,7 +85,10 @@ function getContent() {
 		if (!result) return reject('Error grabbing time');
 		paused = result !== 'Pause';
 
-		return resolve({ title, artist, time, paused });
+		result = await executeJavaScript('document.querySelector(\'div.ytmusic-player-queue\').firstElementChild.selected');
+		isFirst = result;
+
+		return resolve({ title, artist, time, paused, isFirst });
 	});
 }
 
@@ -88,18 +100,21 @@ let startTimestamp = new Date(),
 	endTimestamp,
 	prevSong;
 
-async function setActivity() {
+let songInfo;
+
+function setActivity() {
 	if (!rpc || !win) {
 		return;
 	}
 
 	// eslint-disable-next-line no-empty-function
-	const { title, artist, time, paused } = await getContent().catch(() => {}) ||
+	const { title, artist, time, paused } = songInfo ||
 		{
 			title: undefined,
 			artist: undefined,
 			time: undefined,
 			paused: undefined,
+			isFirst: undefined,
 		};
 	const now = new Date();
 
@@ -145,6 +160,84 @@ async function setActivity() {
 	rpc.setActivity(activity);
 }
 
+
+async function updateSongInfo() {
+	if (!rpc || !win) {
+		return;
+	}
+
+	songInfo = await getContent().catch(() => null);
+
+	// eslint-disable-next-line no-empty-function
+	const { title, artist, time, paused, isFirst } = songInfo ||
+		{
+			title: undefined,
+			artist: undefined,
+			time: undefined,
+			paused: undefined,
+			isFirst: undefined,
+		};
+
+	win.setThumbnailClip({
+		x: 0,
+		y: 0,
+		width: 0,
+		height: 0,
+	});
+
+	const toolTipButtons = [
+		{
+			tooltip: 'Previous Song',
+			icon: getNativeImage('assets/images/prev.png'),
+			async click() {
+				await executeJavaScript('document.querySelector(\'paper-icon-button.previous-button\').click();');
+			},
+		}, {
+			tooltip: 'Play',
+			icon: getNativeImage('assets/images/play.png'),
+			async click() {
+				await executeJavaScript('document.querySelector(\'paper-icon-button.play-pause-button\').click();');
+			},
+		}, {
+			tooltip: 'Next Song',
+			icon: getNativeImage('assets/images/next.png'),
+			async click() {
+				await executeJavaScript('document.querySelector(\'paper-icon-button.next-button\').click();');
+			},
+		},
+	];
+
+	if (!title && !artist) {
+		if (process.platform === 'win32') {
+			win.setProgressBar(1.000000001);
+		}
+		win.setOverlayIcon(null, 'Browsing');
+	} else if (process.platform === 'win32') {
+		win.setProgressBar(time[0] / time[1], {
+			mode: paused ? 'paused' : 'normal',
+		});
+
+		if (isFirst) {
+			toolTipButtons[0].flags = ['disabled'];
+		}
+
+		if (paused) {
+			win.setOverlayIcon(getNativeImage('assets/images/pause.png'), 'Paused');
+			win.setThumbarButtons(toolTipButtons);
+		} else 	if (prevSong !== { title, artist }) {
+			prevSong = { title, artist };
+			win.setOverlayIcon(getNativeImage('assets/images/play.png'), 'Listening');
+
+			toolTipButtons[1].tooltip = 'Pause';
+			toolTipButtons[1].icon = getNativeImage('assets/images/pause.png');
+
+			win.setThumbarButtons(toolTipButtons);
+		}
+	} else {
+		win.setProgressBar(time[0] / time[1]);
+	}
+}
+
 rpc.once('disconnected', () => {
 	rpc = null;
 	reconnectTimer = setInterval(reconnect, 5e3);
@@ -161,9 +254,14 @@ function reconnect() {
 	});
 }
 
+function getNativeImage(filePath) {
+	return nativeImage.createFromPath(path.join(process.cwd(), resourcePath, filePath));
+}
+
 rpc.on('ready', () => {
 	setActivity();
 	setInterval(setActivity, 15e3);
+	setInterval(updateSongInfo, 100);
 });
 
 // eslint-disable-next-line no-console
