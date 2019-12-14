@@ -8,7 +8,7 @@ const resourcePath = process.platform === 'darwin' ? 'Contents/Resources' : 'res
 
 function executeJavaScript(code) {
 	return new Promise(resolve => {
-		win.webContents.executeJavaScript(code, resolve);
+		win.webContents.executeJavaScript(code).then(data => resolve(data));
 	});
 }
 
@@ -79,8 +79,7 @@ function getContent() {
 		result = await executeJavaScript('document.querySelector(\'span.time-info\').textContent;');
 		if (!result) return reject('Error grabbing time');
 		time = result.replace(/\s{1,}/g, '').split('/').map(e =>
-			e.split(':').reduce((acc, seconds) => (60 * acc) + +seconds)
-		);
+			e.split(':').reduce((acc, seconds) => (60 * acc) + seconds));
 
 		result = await executeJavaScript('document.querySelector(\'paper-icon-button.play-pause-button\').title;');
 		if (!result) return reject('Error grabbing time');
@@ -132,7 +131,7 @@ function setActivity() {
 		startTimestamp = now - (time[0] * 1000);
 		endTimestamp = startTimestamp + (time[1] * 1000);
 		details = title;
-		state = `${artist[0]} • ${artist[1]} (${artist[2]})`;
+		state = `${artist[0] || 'Unknown'} • ${artist[1] || 'Unknown'} (${artist[2] || 'Unknown'})`;
 
 		if (paused) {
 			smallImageKey = 'pause';
