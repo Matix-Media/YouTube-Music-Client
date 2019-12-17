@@ -79,7 +79,10 @@ function getContent() {
 		result = await executeJavaScript('document.querySelector(\'span.time-info\').textContent;');
 		if (!result) return reject('Error grabbing time');
 		time = result.replace(/\s{1,}/g, '').split('/').map(e =>
-			e.split(':').reduce((acc, seconds) => (60 * acc) + seconds));
+			e.split(':').map(el => Number(el)).reverse()
+				// eslint-disable-next-line comma-dangle
+				.reduce((acc, cur, idx) => acc + (cur * getMultiplier(idx)))
+		);
 
 		result = await executeJavaScript('document.querySelector(\'paper-icon-button.play-pause-button\').title;');
 		if (!result) return reject('Error grabbing time');
@@ -258,10 +261,21 @@ function getNativeImage(filePath) {
 	return nativeImage.createFromPath(path.join(process.cwd(), resourcePath, filePath));
 }
 
+const secondsTimeTable = [
+	1,
+	60,
+	60,
+];
+
+function getMultiplier(index, accumulator = 1) {
+	return index === 0 ? accumulator * secondsTimeTable[index] :
+		getMultiplier(index - 1, accumulator * secondsTimeTable[index]);
+}
+
 rpc.on('ready', () => {
 	setActivity();
 	setInterval(setActivity, 15e3);
-	setInterval(updateSongInfo, 100);
+	setInterval(updateSongInfo, 250);
 });
 
 // eslint-disable-next-line no-console
