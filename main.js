@@ -35,7 +35,10 @@ function createWindow() {
 	const menu = Menu.buildFromTemplate(menuTemplate);
 	Menu.setApplicationMenu(menu);
 	win.setMenuBarVisibility(false);
-	win.loadURL('https://music.youtube.com/');
+	win.loadURL('https://music.youtube.com/', {
+		// eslint-disable-next-line max-len
+		userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0',
+	});
 	win.on('closed', () => {
 		win = null;
 	});
