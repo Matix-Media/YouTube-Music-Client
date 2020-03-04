@@ -25,6 +25,7 @@ jobs:
       os: osx
       osx_image: xcode10.2
       script: 
+        - rm -f package-lock.json
         - yarn dist:mw
         - ls dist/
       before_cache: rm -rf $HOME/.cache/electron-builder/wine
@@ -33,6 +34,7 @@ jobs:
       os: linux
       dist: xenial
       script: 
+        - rm -f package-lock.json
         - yarn dist:linux
         - ls dist/
 
