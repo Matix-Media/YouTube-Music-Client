@@ -1,13 +1,33 @@
 'use strict';
 const DiscordRPC = require('discord-rpc');
-const { app, BrowserWindow, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, Menu, nativeImage, ipcMain } = require('electron');
 const path = require('path');
-let reconnectTimer;
+const fs = require('fs');
+const { clearInterval } = require('timers');
+
+const dataPath = app.getPath('userData');
+const generalConfigPath = path.join(dataPath, 'config.json');
+
+try {
+	JSON.parse(fs.readFileSync(generalConfigPath))
+}
+catch
+{
+	fs.unlinkSync(generalConfigPath);
+	fs.writeFileSync(generalConfigPath, JSON.stringify({}))
+}
+
+const config = JSON.parse(fs.readFileSync(generalConfigPath));
+if (!config.continueWhereLeftOf || typeof config.continueWhereLeftOf !== 'boolean') config.continueWhereLeftOf = false;
+if (!config.continueURL || typeof config.continueURL !== 'string') config.continueURL = 'https://music.youtube.com/';
+
+let reconnectTimer, injected, initialPrevent;
+initialPrevent = false;
 
 const resourcePath = process.platform === 'darwin' ? 'Contents/Resources' : 'resources';
 
 function executeJavaScript(code) {
-	return new Promise(resolve => {
+	return new Promise(async (resolve) => {
 		win.webContents.executeJavaScript(code).then(data => resolve(data));
 	});
 }
@@ -28,36 +48,105 @@ if (process.platform === 'darwin') {
 
 function createWindow() {
 	// Create the browser window.
-	win = new BrowserWindow({ width: 800, height: 700 });
+	win = new BrowserWindow({
+		width: 800,
+		height: 700,
+		webPreferences: {
+			preload: path.join(process.cwd(), 'src', 'preload.js')
+	   	}
+	});
 	win.setMinimumSize(300, 300);
 	win.setSize(800, 700);
 	win.setResizable(true);
 	const menu = Menu.buildFromTemplate(menuTemplate);
 	Menu.setApplicationMenu(menu);
 	win.setMenuBarVisibility(false);
-	win.loadURL('https://music.youtube.com/', {
-		// eslint-disable-next-line max-len
-		userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0',
-	});
+
+	win.on('close', async (e) => {
+		initialPrevent = true;
+
+		let tempInfo = await getContent().catch(() => null);
+		const { time, paused } = tempInfo ||
+		{
+			time: undefined,
+			paused: undefined
+		};
+
+		if (!config.continueWhereLeftOf) {
+			config.continueURL = 'https://music.youtube.com/';
+		}
+		else {
+
+			config.continueURL = win.webContents.getURL();
+			config.continueURL += `&autoplay=0&t=${time[0]}`;
+		}
+
+		console.log(config.continueURL);
+		fs.writeFileSync(generalConfigPath, JSON.stringify(config, null, '\t'));
+	})
 	win.on('closed', () => {
 		win = null;
 	});
 	win.on('page-title-updated', (e, title) => {
-		win.setTitle(`${title} - v${require('./package.json').version}`);
+		win.setTitle(`${title} - v${require('../package.json').version}`);
 		e.preventDefault();
+	});
+
+	win.webContents.on('update-target-url', settingsHook);
+	win.webContents.on('will-prevent-unload', e => e.preventDefault());
+
+	win.loadURL(config.continueURL, {
+		// eslint-disable-next-line max-len
+		userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0',
+		// Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
+	});
+
+	win.webContents.openDevTools();
+
+	if (!config.continueWhereLeftOf) return;
+
+	win.webContents.once('media-started-playing', async () => {
+		await executeJavaScript('document.querySelector(\'#play-pause-button > iron-icon\').click();');
 	});
 }
 
 app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
+	fs.writeFileSync(generalConfigPath, JSON.stringify(config, null, '\t'));
 	app.quit();
+});
+app.on('will-quit', () => {
+	fs.writeFileSync(generalConfigPath, JSON.stringify(config, null, '\t'));
 });
 
 app.on('activate', () => {
 	if (win === null) {
 		createWindow();
 	}
+});
+
+async function settingsHook(event, url) {
+	if (!url.endsWith('.com/settings') || injected) return;
+
+	// eslint-disable-next-line max-len
+	await executeJavaScript(fs.readFileSync(path.join(process.cwd(), 'src', 'settingsInjection.js')).toString().replaceAll('\r', ''))
+	injected = true;
+}
+
+ipcMain.on('left-of-checked', (event, checked) => {
+	console.log(checked);
+	config.continueWhereLeftOf = checked;
+
+	if (checked === false) {
+		config.continueURL = 'https://music.youtube.com/';
+	}
+
+	event.returnValue = undefined;
+});
+
+ipcMain.on('get-left-of-checked', (event, arg) => {
+	event.returnValue = config.continueWhereLeftOf;
 });
 
 function getContent() {
@@ -70,8 +159,7 @@ function getContent() {
 			isFirst,
 			result;
 
-		result =
-			await executeJavaScript('document.querySelector(\'div.content-info-wrapper yt-formatted-string.title\').title;');
+		result = await executeJavaScript('document.querySelector(\'div.content-info-wrapper yt-formatted-string.title\').title;');
 		if (!result) return reject('Error grabbing title');
 		title = result;
 
