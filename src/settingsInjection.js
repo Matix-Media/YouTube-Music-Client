@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 const leftOfHTML = `<ytmusic-setting-boolean-renderer class="style-scope ytmusic-setting-category-collection-renderer">
 	<div class="content style-scope ytmusic-setting-boolean-renderer" for="">
 		<yt-formatted-string id="left-of-label" class="title style-scope ytmusic-setting-boolean-renderer"></yt-formatted-string>
@@ -17,36 +19,36 @@ const descriptionHTML = `<yt-formatted-string id="left-of-description" class="su
 
 window.addEventListener('iron-overlay-opened', () => {
 	const listBox = document.querySelector('#content > ytmusic-settings-page > div.content.style-scope.ytmusic-settings-page > paper-listbox');
-	
+
 	if (!listBox) return;
 
 	const generalButton = listBox.querySelector('#content > ytmusic-settings-page > div.content.style-scope.ytmusic-settings-page > paper-listbox > paper-item:nth-child(1)');
-	//console.log(generalButton.querySelector('yt-formatted-string').innerText);
+	// console.log(generalButton.querySelector('yt-formatted-string').innerText);
 
-	if (generalButton.querySelector('yt-formatted-string').innerText != 'General') return;
+	if (generalButton.querySelector('yt-formatted-string').innerText !== 'General') return;
 
 	injectEl();
 
 	generalButton.addEventListener('focus', (...args) => {
-		//console.log(args);
+		// console.log(args);
 
-		//console.log(args[0].__relatedTarget == null)
+		// console.log(args[0].__relatedTarget == null)
 
-		if (args[0].__relatedTarget == null) return;
+		if (args[0].__relatedTarget === null) return;
 
-		//console.log('reinjecting');
+		// console.log('reinjecting');
 
 		setTimeout(injectEl, 200);
-	})
+	});
 
-	//console.log('settings opened')
+	// console.log('settings opened')
 });
 
 function injectEl() {
 	let tempElement = document.createElement('div');
 	tempElement.innerHTML = leftOfHTML.trim();
 
-	//console.log(tempElement.firstChild)
+	// console.log(tempElement.firstChild)
 
 	document.querySelector('#content > ytmusic-settings-page > div.content.style-scope.ytmusic-settings-page > ytmusic-setting-category-collection-renderer > div').appendChild(tempElement.firstChild);
 
@@ -57,13 +59,13 @@ function injectEl() {
 
 	leftOfOption.insertBefore(tempElement.firstChild, leftOfOption.lastChild);
 	leftOfOption.querySelector('#left-of-description').innerText = 'YouTube Music Client will continue where you left of while jamming to your favorite tracks.';
-	
+
 	const continueState = window.ipcRenderer.sendSync('get-left-of-checked', null);
 	const continueToggle = leftOfOption.querySelector('iron-label > paper-toggle-button');
 
 	continueToggle.addEventListener('click', () => {
 		window.ipcRenderer.sendSync('left-of-checked', continueToggle.checked);
 	});
-	
+
 	continueToggle.checked = continueState;
 }

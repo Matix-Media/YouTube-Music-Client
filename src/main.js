@@ -9,25 +9,22 @@ const dataPath = app.getPath('userData');
 const generalConfigPath = path.join(dataPath, 'config.json');
 
 try {
-	JSON.parse(fs.readFileSync(generalConfigPath))
-}
-catch
-{
+	JSON.parse(fs.readFileSync(generalConfigPath));
+} catch (ex) {
 	fs.unlinkSync(generalConfigPath);
-	fs.writeFileSync(generalConfigPath, JSON.stringify({}))
+	fs.writeFileSync(generalConfigPath, JSON.stringify({}));
 }
 
 const config = JSON.parse(fs.readFileSync(generalConfigPath));
 if (!config.continueWhereLeftOf || typeof config.continueWhereLeftOf !== 'boolean') config.continueWhereLeftOf = false;
 if (!config.continueURL || typeof config.continueURL !== 'string') config.continueURL = 'https://music.youtube.com/';
 
-let reconnectTimer, injected, initialPrevent;
-initialPrevent = false;
+let reconnectTimer, injected;
 
 const resourcePath = process.platform === 'darwin' ? 'Contents/Resources' : 'resources';
 
 function executeJavaScript(code) {
-	return new Promise(async (resolve) => {
+	return new Promise(resolve => {
 		win.webContents.executeJavaScript(code).then(data => resolve(data));
 	});
 }
@@ -52,8 +49,8 @@ function createWindow() {
 		width: 800,
 		height: 700,
 		webPreferences: {
-			preload: path.join(process.cwd(), 'src', 'preload.js')
-	   	}
+			preload: path.join(process.cwd(), 'src', 'preload.js'),
+		},
 	});
 	win.setMinimumSize(300, 300);
 	win.setSize(800, 700);
@@ -62,28 +59,25 @@ function createWindow() {
 	Menu.setApplicationMenu(menu);
 	win.setMenuBarVisibility(false);
 
-	win.on('close', async (e) => {
-		initialPrevent = true;
-
+	win.on('close', async () => {
 		let tempInfo = await getContent().catch(() => null);
+		// eslint-disable-next-line no-unused-vars
 		const { time, paused } = tempInfo ||
 		{
 			time: undefined,
-			paused: undefined
+			paused: undefined,
 		};
 
 		if (!config.continueWhereLeftOf) {
 			config.continueURL = 'https://music.youtube.com/';
-		}
-		else {
-
+		} else {
 			config.continueURL = win.webContents.getURL();
 			config.continueURL += `&autoplay=0&t=${time[0]}`;
 		}
 
 		console.log(config.continueURL);
 		fs.writeFileSync(generalConfigPath, JSON.stringify(config, null, '\t'));
-	})
+	});
 	win.on('closed', () => {
 		win = null;
 	});
@@ -96,8 +90,8 @@ function createWindow() {
 	win.webContents.on('will-prevent-unload', e => e.preventDefault());
 
 	win.loadURL(config.continueURL, {
-		// eslint-disable-next-line max-len
 		userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0',
+		// eslint-disable-next-line max-len
 		// Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
 	});
 
@@ -130,7 +124,7 @@ async function settingsHook(event, url) {
 	if (!url.endsWith('.com/settings') || injected) return;
 
 	// eslint-disable-next-line max-len
-	await executeJavaScript(fs.readFileSync(path.join(process.cwd(), 'src', 'settingsInjection.js')).toString().replaceAll('\r', ''))
+	await executeJavaScript(fs.readFileSync(path.join(process.cwd(), 'src', 'settingsInjection.js')).toString().replaceAll('\r', ''));
 	injected = true;
 }
 
@@ -145,7 +139,7 @@ ipcMain.on('left-of-checked', (event, checked) => {
 	event.returnValue = undefined;
 });
 
-ipcMain.on('get-left-of-checked', (event, arg) => {
+ipcMain.on('get-left-of-checked', event => {
 	event.returnValue = config.continueWhereLeftOf;
 });
 
@@ -159,6 +153,7 @@ function getContent() {
 			isFirst,
 			result;
 
+		// eslint-disable-next-line max-len
 		result = await executeJavaScript('document.querySelector(\'div.content-info-wrapper yt-formatted-string.title\').title;');
 		if (!result) return reject('Error grabbing title');
 		title = result;

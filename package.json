@@ -5,8 +5,8 @@
 	"main": "src/main.js",
 	"scripts": {
 		"test": "yarn lint",
-		"lint": "eslint *.js",
-		"lint:fix": "eslint --fix *.js",
+		"lint": "eslint **/*.js",
+		"lint:fix": "eslint --fix **/*.js",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
 		"dist:mac": "electron-builder --mac",
