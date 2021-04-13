@@ -162,16 +162,12 @@ function getContent() {
 		if (!result) return reject('Error grabbing artist');
 		artist = result.split(' • ');
 
-		result = await executeJavaScript('document.querySelector(\'span.time-info\').textContent;');
+		result = await executeJavaScript('document.querySelector(\'#progress-bar\').value;');
 		if (!result) return reject('Error grabbing time');
-		time = result.replace(/\s{1,}/g, '').split('/').map(e =>
-			e.split(':').map(el => Number(el)).reverse()
-				// eslint-disable-next-line comma-dangle
-				.reduce((acc, cur, idx) => acc + (cur * getMultiplier(idx)))
-		);
+		time = result;
 
-		result = await executeJavaScript('document.querySelector(\'#icon\').title;');
-		if (!result) return reject('Error grabbing time');
+		result = await executeJavaScript('document.querySelector(\'#play-pause-button\').title;');
+		if (!result) return reject('Error grabbing play status');
 		paused = result !== 'Pause';
 
 		result = await executeJavaScript('document.querySelector(\'div.ytmusic-player-queue\').firstElementChild.selected');
@@ -211,6 +207,8 @@ function setActivity() {
 		state,
 		smallImageKey,
 		smallImageText;
+
+	console.log(songInfo);
 
 	if (!title && !artist) {
 		details = 'Browsing';
@@ -255,7 +253,7 @@ async function updateSongInfo() {
 		return;
 	}
 
-	songInfo = await getContent().catch(() => null);
+	songInfo = await getContent().catch(console.log);
 
 	// eslint-disable-next-line no-empty-function
 	const { title, artist, time, paused, isFirst } = songInfo ||
@@ -345,17 +343,6 @@ function reconnect() {
 
 function getNativeImage(filePath) {
 	return nativeImage.createFromPath(path.join(process.cwd(), resourcePath, filePath));
-}
-
-const secondsTimeTable = [
-	1,
-	60,
-	60,
-];
-
-function getMultiplier(index, accumulator = 1) {
-	return index === 0 ? accumulator * secondsTimeTable[index] :
-		getMultiplier(index - 1, accumulator * secondsTimeTable[index]);
 }
 
 rpc.on('ready', () => {
