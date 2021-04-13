@@ -170,7 +170,7 @@ function getContent() {
 				.reduce((acc, cur, idx) => acc + (cur * getMultiplier(idx)))
 		);
 
-		result = await executeJavaScript('document.querySelector(\'paper-icon-button.play-pause-button\').title;');
+		result = await executeJavaScript('document.querySelector(\'#icon\').title;');
 		if (!result) return reject('Error grabbing time');
 		paused = result !== 'Pause';
 
