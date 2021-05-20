@@ -29,7 +29,7 @@ function executeJavaScript(code) {
 	});
 }
 
-let win;
+let win, settingsWin;
 const menuTemplate = [
 	{
 		label: 'Interface',
@@ -43,6 +43,21 @@ if (process.platform === 'darwin') {
 	menuTemplate.unshift({});
 }
 
+function createSettingsWindow() {
+	settingsWin = new BrowserWindow({
+		width: 800,
+		height: 700,
+		webPreferences: {
+			preload: path.join(process.cwd(), 'src', 'preload.js'),
+		},
+	});
+	settingsWin.setMinimumSize(300, 300);
+	settingsWin.setResizable(true);
+	const menu = Menu.buildFromTemplate(menuTemplate);
+	Menu.setApplicationMenu(menu);
+	settingsWin.setMenuBarVisibility(false);
+}
+
 function createWindow() {
 	// Create the browser window.
 	win = new BrowserWindow({
@@ -53,7 +68,6 @@ function createWindow() {
 		},
 	});
 	win.setMinimumSize(300, 300);
-	win.setSize(800, 700);
 	win.setResizable(true);
 	const menu = Menu.buildFromTemplate(menuTemplate);
 	Menu.setApplicationMenu(menu);
@@ -86,7 +100,7 @@ function createWindow() {
 		e.preventDefault();
 	});
 
-	win.webContents.on('update-target-url', settingsHook);
+	win.webContents.on('dom-ready', settingsHook);
 	win.webContents.on('will-prevent-unload', e => e.preventDefault());
 
 	win.loadURL(config.continueURL, {
@@ -95,7 +109,7 @@ function createWindow() {
 		// Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
 	});
 
-	// win.webContents.openDevTools();
+	win.webContents.openDevTools();
 
 	if (!config.continueWhereLeftOf) return;
 
@@ -120,8 +134,8 @@ app.on('activate', () => {
 	}
 });
 
-async function settingsHook(event, url) {
-	if (!url.endsWith('.com/settings') || injected) return;
+async function settingsHook() {
+	if (injected) return;
 
 	// eslint-disable-next-line max-len
 	await executeJavaScript(fs.readFileSync(path.join(process.cwd(), 'src', 'settingsInjection.js')).toString().replaceAll('\r', ''));
@@ -143,12 +157,17 @@ ipcMain.on('get-left-of-checked', event => {
 	event.returnValue = config.continueWhereLeftOf;
 });
 
+ipcMain.on('settings-clicked', () => {
+	createSettingsWindow();
+});
+
 function getContent() {
 	// eslint-disable-next-line no-async-promise-executor
 	return new Promise(async (resolve, reject) => {
 		let title,
 			artist,
-			time,
+			timeMax,
+			timeNow,
 			paused,
 			isFirst,
 			result;
@@ -162,9 +181,13 @@ function getContent() {
 		if (!result) return reject('Error grabbing artist');
 		artist = result.split(' • ');
 
-		result = await executeJavaScript('document.querySelector(\'#progress-bar\').value;');
-		if (!result) return reject('Error grabbing time');
-		time = result;
+		result = await executeJavaScript('document.querySelector(\'#progress-bar\').getAttribute(\'aria-valuemax\');');
+		if (!result) return reject('Error grabbing time max');
+		timeMax = result;
+
+		result = await executeJavaScript('document.querySelector(\'#progress-bar\').getAttribute(\'aria-valuenow\');');
+		if (!result) return reject('Error grabbing time now');
+		timeNow = result;
 
 		result = await executeJavaScript('document.querySelector(\'#play-pause-button\').title;');
 		if (!result) return reject('Error grabbing play status');
@@ -173,7 +196,7 @@ function getContent() {
 		result = await executeJavaScript('document.querySelector(\'div.ytmusic-player-queue\').firstElementChild.selected');
 		isFirst = result;
 
-		return resolve({ title, artist, time, paused, isFirst });
+		return resolve({ title, artist, time: [timeNow, timeMax], paused, isFirst });
 	});
 }
 
