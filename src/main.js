@@ -321,7 +321,8 @@ async function updateSongInfo() {
 
 	if (!title && !artist) {
 		if (process.platform === 'win32') {
-			win.setProgressBar(1.000000001);
+			// Set progress to a ridiculously low number above 1
+			win.setProgressBar(1 + 1e-10);
 		}
 		win.setOverlayIcon(null, 'Browsing');
 	} else if (process.platform === 'win32') {
@@ -373,7 +374,7 @@ function getNativeImage(filePath) {
 rpc.on('ready', () => {
 	setActivity();
 	setInterval(setActivity, 15e3);
-	setInterval(updateSongInfo, 250);
+	setInterval(updateSongInfo, 1e3);
 });
 
 // eslint-disable-next-line no-console
