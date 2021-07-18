@@ -11,7 +11,9 @@ const generalConfigPath = path.join(dataPath, 'config.json');
 try {
 	JSON.parse(fs.readFileSync(generalConfigPath));
 } catch (ex) {
-	fs.unlinkSync(generalConfigPath);
+	if (fs.existsSync(generalConfigPath)) {
+		fs.unlinkSync(generalConfigPath);
+	}
 	fs.writeFileSync(generalConfigPath, JSON.stringify({}));
 }
 
