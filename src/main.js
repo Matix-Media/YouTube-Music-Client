@@ -11,9 +11,6 @@ const generalConfigPath = path.join(dataPath, 'config.json');
 try {
 	JSON.parse(fs.readFileSync(generalConfigPath));
 } catch (ex) {
-	if (fs.existsSync(generalConfigPath)) {
-		fs.unlinkSync(generalConfigPath);
-	}
 	fs.writeFileSync(generalConfigPath, JSON.stringify({}));
 }
 
@@ -65,6 +62,7 @@ function createWindow() {
 	win = new BrowserWindow({
 		width: 800,
 		height: 700,
+		title: `YouTube Music - v${require('../package.json').version}`,
 		webPreferences: {
 			preload: path.join(process.cwd(), 'src', 'preload.js'),
 		},
@@ -111,7 +109,7 @@ function createWindow() {
 		// Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
 	});
 
-	// win.webContents.openDevTools();
+	win.webContents.openDevTools();
 
 	if (!config.continueWhereLeftOf) return;
 
@@ -233,8 +231,6 @@ function setActivity() {
 		smallImageKey,
 		smallImageText;
 
-	console.log(songInfo);
-
 	if (!title && !artist) {
 		details = 'Browsing';
 		smallImageKey = undefined;
@@ -278,10 +274,10 @@ async function updateSongInfo() {
 		return;
 	}
 
-	songInfo = await getContent().catch(console.log);
+	songInfo = await getContent().catch(() => null);
 
 	// eslint-disable-next-line no-empty-function
-	const { title, artist, time, paused, isFirst } = songInfo ||
+	const { title, artist, paused, isFirst } = songInfo ||
 		{
 			title: undefined,
 			artist: undefined,
@@ -320,16 +316,8 @@ async function updateSongInfo() {
 	];
 
 	if (!title && !artist) {
-		if (process.platform === 'win32') {
-			// Set progress to a ridiculously low number above 1
-			win.setProgressBar(1 + 1e-10);
-		}
 		win.setOverlayIcon(null, 'Browsing');
 	} else if (process.platform === 'win32') {
-		win.setProgressBar(time[0] / time[1], {
-			mode: paused ? 'paused' : 'normal',
-		});
-
 		if (isFirst) {
 			toolTipButtons[0].flags = ['disabled'];
 		}
@@ -346,8 +334,6 @@ async function updateSongInfo() {
 
 			win.setThumbarButtons(toolTipButtons);
 		}
-	} else {
-		win.setProgressBar(time[0] / time[1]);
 	}
 }
 
@@ -372,9 +358,11 @@ function getNativeImage(filePath) {
 }
 
 rpc.on('ready', () => {
-	setActivity();
-	setInterval(setActivity, 15e3);
-	setInterval(updateSongInfo, 1e3);
+	setTimeout(() => {
+		setActivity();
+		setInterval(setActivity, 15e3);
+		setInterval(updateSongInfo, 1e3);
+	}, 1000);
 });
 
 // eslint-disable-next-line no-console
