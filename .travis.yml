@@ -39,12 +39,12 @@ branches:
     except:
         - "/^v\\d+\\.\\d+\\.\\d+$/"
 
-deploy:
-  providers: releases
-  api_key:
-    secure: "BGOIG1MIfuD1o6RFS26p1MWznAGx28ZoZPS30AGG+yr4LawnK3jinzHS/rPTF8MSzpPNnCCttpbBq/wXrgDDNOH1ivKlIa+3UNF2HWa+YGPcS8WO9V6i9PqQPPGE+74Nq1BLYCngqMwjLOvQ3LDYOT2pdERUmmLnndZ70kcPfTEHE9IFQKzxQ6kK5M+7wp8VtBw3+02869h07fdAKSWtvVD+DBTDP0dEJVjvT/WPpHfG7mVA/JMBX+tg3KksGce745Cy7p1YxnYRNOOv89CC08R2MJe43U7oe6uQvhzhXNpuYdKjSxPdW1kJIyMoqW0z2yKkhqVK6bSFdmvfLrZivTFGfO7Z9UttGzoxEhD6TbEc1mfPU2a+tJX+EwktCmaQBXXVW+Q0lz5iFx9tCMwg/EItwVUvDt0j2+oVumzn5J3Tw2h6WeHPFsn8RTRdnz0Eg7HL8NsxRkAhKCeG70L3XPkdGvXunwo9aFjRf5pUtOWwEHrG9Ok4xc1DlOTgNIi+060BanyX5YQ5b7H9uCDltYlqxnMtuCzE4Rxr7NERmU0C7WxbJ8LmTlBTik1TJlgQMB3pY29Yl3kKlhkPQHseg7oz5lqOji4TveJ3koo4cjN+8UGBTV24yPmzpx4WdSIMqp5ndvCn1bk/eALbtk5oFapHL1mEJMRdQDH4S7kdFMQ="
-  file_glob: true
-  file: "dist/YouTube Music*.{exe,AppImage,dmg,zip}"
-  skip_cleanup: true
-  on:
-    tags: true
+# deploy:
+#  providers: releases
+#  api_key:
+#    secure: "BGOIG1MIfuD1o6RFS26p1MWznAGx28ZoZPS30AGG+yr4LawnK3jinzHS/rPTF8MSzpPNnCCttpbBq/wXrgDDNOH1ivKlIa+3UNF2HWa+YGPcS8WO9V6i9PqQPPGE+74Nq1BLYCngqMwjLOvQ3LDYOT2pdERUmmLnndZ70kcPfTEHE9IFQKzxQ6kK5M+7wp8VtBw3+02869h07fdAKSWtvVD+DBTDP0dEJVjvT/WPpHfG7mVA/JMBX+tg3KksGce745Cy7p1YxnYRNOOv89CC08R2MJe43U7oe6uQvhzhXNpuYdKjSxPdW1kJIyMoqW0z2yKkhqVK6bSFdmvfLrZivTFGfO7Z9UttGzoxEhD6TbEc1mfPU2a+tJX+EwktCmaQBXXVW+Q0lz5iFx9tCMwg/EItwVUvDt0j2+oVumzn5J3Tw2h6WeHPFsn8RTRdnz0Eg7HL8NsxRkAhKCeG70L3XPkdGvXunwo9aFjRf5pUtOWwEHrG9Ok4xc1DlOTgNIi+060BanyX5YQ5b7H9uCDltYlqxnMtuCzE4Rxr7NERmU0C7WxbJ8LmTlBTik1TJlgQMB3pY29Yl3kKlhkPQHseg7oz5lqOji4TveJ3koo4cjN+8UGBTV24yPmzpx4WdSIMqp5ndvCn1bk/eALbtk5oFapHL1mEJMRdQDH4S7kdFMQ="
+#  file_glob: true
+#  file: "dist/YouTube Music*.{exe,AppImage,dmg,zip}"
+#  skip_cleanup: true
+#  on:
+#    tags: true
