@@ -163,7 +163,9 @@ async function settingsHook() {
     // eslint-disable-next-line max-len
     await executeJavaScript(
         fs
-            .readFileSync(path.join(process.cwd(), "src", "settingsInjection.js"))
+            .readFileSync(
+                path.join(process.cwd(), "resources", "assets", "scripts", "settingsInjection.js")
+            )
             .toString()
             .replaceAll("\r", "")
     );
