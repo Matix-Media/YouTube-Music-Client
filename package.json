@@ -9,7 +9,6 @@
         "lint:fix": "eslint --fix **/*.js",
         "start": "electron . --dev",
         "pack": "electron-builder --dir",
-        "dist:mac": "electron-builder --mac",
         "dist:win": "electron-builder --win --x64 --ia32",
         "dist": "electron-builder",
         "postinstall": "electron-builder install-app-deps"
