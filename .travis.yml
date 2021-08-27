@@ -31,6 +31,7 @@ script:
     else
       yarn dist
     fi
+    
 before_cache:
     - rm -rf $HOME/.cache/electron-builder/wine
 
