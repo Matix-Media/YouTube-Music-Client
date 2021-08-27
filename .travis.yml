@@ -47,4 +47,4 @@ deploy:
   file: "dist/YouTube Music*.{exe,AppImage,dmg,zip}"
   skip_cleanup: true
   on:
-    tags: false
+    tags: true
