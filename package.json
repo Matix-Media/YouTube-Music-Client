@@ -11,11 +11,7 @@
         "pack": "electron-builder --dir",
         "dist:mac": "electron-builder --mac",
         "dist:win": "electron-builder --win --x64 --ia32",
-        "dist:win32": "electron-builder --win --ia32",
-        "dist:win64": "electron-builder --win --x64",
-        "dist:mw": "yarn dist:win && yarn dist:mac",
-        "dist:linux": "electron-builder --linux --x64 --ia32",
-        "dist": "yarn dist:mw && yarn dist:linux",
+        "dist": "electron-builder",
         "postinstall": "electron-builder install-app-deps"
     },
     "keywords": [
