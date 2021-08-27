@@ -1,12 +1,14 @@
 "use strict";
 const DiscordRPC = require("discord-rpc");
 const { app, BrowserWindow, Menu, nativeImage, ipcMain } = require("electron");
+const windowStateKeeper = require("electron-window-state");
 const path = require("path");
 const fs = require("fs");
 const { clearInterval } = require("timers");
 
 const dataPath = app.getPath("userData");
 const generalConfigPath = path.join(dataPath, "config.json");
+const boundaryConfigPath = path.join(dataPath, "bounds.json");
 
 try {
     JSON.parse(fs.readFileSync(generalConfigPath));
@@ -46,6 +48,7 @@ function createSettingsWindow() {
     settingsWin = new BrowserWindow({
         width: 800,
         height: 700,
+        title: `YouTube Music - Settings - v${require("../package.json").version}`,
         webPreferences: {
             preload: path.join(process.cwd(), "src", "preload.js"),
         },
@@ -59,14 +62,20 @@ function createSettingsWindow() {
 
 function createWindow() {
     // Create the browser window.
+    let winState = windowStateKeeper({
+        defaultWidth: 1000,
+        defaultHeight: 800,
+    });
+
     win = new BrowserWindow({
-        width: 800,
-        height: 700,
+        ...winState,
         title: `YouTube Music - v${require("../package.json").version}`,
+        backgroundColor: "#000000",
         webPreferences: {
             preload: path.join(process.cwd(), "src", "preload.js"),
         },
     });
+    winState.manage(win);
     win.setMinimumSize(300, 300);
     win.setResizable(true);
     const menu = Menu.buildFromTemplate(menuTemplate);
@@ -89,7 +98,11 @@ function createWindow() {
         }
 
         console.log(config.continueURL);
-        fs.writeFileSync(generalConfigPath, JSON.stringify(config, null, "\t"));
+        try {
+            fs.writeFileSync(generalConfigPath, JSON.stringify(config, null, "\t"));
+        } catch (e) {
+            console.warn("Could not save continue config");
+        }
     });
     win.on("closed", () => {
         win = null;

@@ -1,6 +1,6 @@
 {
     "name": "youtube_music_client",
-    "version": "1.1.8",
+    "version": "1.1.9",
     "description": "YouTube Music Client with Discord RPC support",
     "main": "src/main.js",
     "scripts": {
@@ -45,7 +45,8 @@
     },
     "dependencies": {
         "discord-rpc": "discordjs/RPC",
-        "discord.js": "discordjs/discord.js"
+        "discord.js": "discordjs/discord.js",
+        "electron-window-state": "^5.0.3"
     },
     "engines": {
         "node": ">=14.0.0"
