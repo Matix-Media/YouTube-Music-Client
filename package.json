@@ -87,7 +87,8 @@
             "output": "dist"
         },
         "extraFiles": [
-            "resources/assets/images/*.png"
+            "resources/assets/images/*.png",
+            "resources/assets/scripts/*.js"
         ]
     }
 }
