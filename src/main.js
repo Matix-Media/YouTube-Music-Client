@@ -1,6 +1,6 @@
 "use strict";
 const DiscordRPC = require("discord-rpc");
-const { app, BrowserWindow, Menu, nativeImage, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, nativeImage, ipcMain, shell } = require("electron");
 const windowStateKeeper = require("electron-window-state");
 const path = require("path");
 const fs = require("fs");
@@ -75,6 +75,7 @@ function createWindow() {
         ...winState,
         title: `YouTube Music - v${require("../package.json").version}`,
         backgroundColor: "#000000",
+        webContents: {},
         webPreferences: {
             preload: path.join(process.cwd(), "src", "preload.js"),
         },
@@ -118,6 +119,10 @@ function createWindow() {
 
     win.webContents.on("dom-ready", settingsHook);
     win.webContents.on("will-prevent-unload", (e) => e.preventDefault());
+    win.webContents.on("new-window", (e, url) => {
+        e.preventDefault();
+        shell.openExternal(url);
+    });
 
     win.loadURL(config.continueURL, {
         userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0",
@@ -131,7 +136,7 @@ function createWindow() {
 
     win.webContents.once("media-started-playing", async () => {
         await executeJavaScript(
-            "document.querySelector('#play-pause-button > iron-icon').click();"
+            "document.querySelector('#play-pause-button > tp-yt-iron-icon').click();"
         );
     });
 }

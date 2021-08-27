@@ -2,43 +2,70 @@
 
 // const ipcRenderer = window.ipcRenderer;
 
-const icon = '<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon" style="pointer-events: none; display: block; width: 100%; height: 100%;"><g class="style-scope yt-icon"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.1-1.65c.2-.15.25-.42.13-.64l-2-3.46c-.12-.22-.4-.3-.6-.22l-2.5 1c-.52-.4-1.08-.73-1.7-.98l-.37-2.65c-.06-.24-.27-.42-.5-.42h-4c-.27 0-.48.18-.5.42l-.4 2.65c-.6.25-1.17.6-1.7.98l-2.48-1c-.23-.1-.5 0-.6.22l-2 3.46c-.14.22-.08.5.1.64l2.12 1.65c-.04.32-.07.65-.07.98s.02.66.06.98l-2.1 1.65c-.2.15-.25.42-.13.64l2 3.46c.12.22.4.3.6.22l2.5-1c.52.4 1.08.73 1.7.98l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.6-.25 1.17-.6 1.7-.98l2.48 1c.23.1.5 0 .6-.22l2-3.46c.13-.22.08-.5-.1-.64l-2.12-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" class="style-scope yt-icon"></path></g></svg>';
+const icon =
+    '<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon" style="pointer-events: none; display: block; width: 100%; height: 100%;"><g class="style-scope yt-icon"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.1-1.65c.2-.15.25-.42.13-.64l-2-3.46c-.12-.22-.4-.3-.6-.22l-2.5 1c-.52-.4-1.08-.73-1.7-.98l-.37-2.65c-.06-.24-.27-.42-.5-.42h-4c-.27 0-.48.18-.5.42l-.4 2.65c-.6.25-1.17.6-1.7.98l-2.48-1c-.23-.1-.5 0-.6.22l-2 3.46c-.14.22-.08.5.1.64l2.12 1.65c-.04.32-.07.65-.07.98s.02.66.06.98l-2.1 1.65c-.2.15-.25.42-.13.64l2 3.46c.12.22.4.3.6.22l2.5-1c.52.4 1.08.73 1.7.98l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.6-.25 1.17-.6 1.7-.98l2.48 1c.23.1.5 0 .6-.22l2-3.46c.13-.22.08-.5-.1-.64l-2.12-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" class="style-scope yt-icon"></path></g></svg>';
 
-window.addEventListener('yt-popup-opened', () => {
-	const settingsMenu = document.querySelector('body > ytmusic-app > ytmusic-popup-container > tp-yt-iron-dropdown');
+const yt_music_d_icon =
+    "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB3aWR0aD0iMTQycHgiIGhlaWdodD0iMzJweCIgdmlld0JveD0iMCAwIDE0MiAzMiIgdmVyc2lvbj0iMS4xIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gPGRlZnM+IDxwYXRoIGQ9Ik0wIDBMODAgMEw4MCAyNEwwIDI0TDAgMFoiIGlkPSJwYXRoXzEiIC8+IDxyZWN0IHdpZHRoPSIxNDIiIGhlaWdodD0iMzIiIGlkPSJhcnRib2FyZF8xIiAvPiA8Y2xpcFBhdGggaWQ9ImNsaXBfMSI+IDx1c2UgeGxpbms6aHJlZj0iI2FydGJvYXJkXzEiIGNsaXAtcnVsZT0iZXZlbm9kZCIgLz4gPC9jbGlwUGF0aD4gPGNsaXBQYXRoIGlkPSJtYXNrXzEiPiA8dXNlIHhsaW5rOmhyZWY9IiNwYXRoXzEiIC8+IDwvY2xpcFBhdGg+IDwvZGVmcz4gPGcgaWQ9IkFydGJvYXJkIiBjbGlwLXBhdGg9InVybCgjY2xpcF8xKSI+IDxnIGlkPSJvbl9wbGF0Zm9ybV9sb2dvX2RhcmsiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEgNCkiPiA8cGF0aCBkPSJNMCAwTDgwIDBMODAgMjRMMCAyNEwwIDBaIiBpZD0iQmFja2dyb3VuZCIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2U9Im5vbmUiIC8+IDxnIGNsaXAtcGF0aD0idXJsKCNtYXNrXzEpIj4gPHBhdGggZD0iTTAgMTJDMCA1LjM3MjU4IDUuNDUzMTcgMCAxMi4xOCAwQzE4LjkwNjggMCAyNC4zNiA1LjM3MjU4IDI0LjM2IDEyQzI0LjM2IDE4LjYyNzQgMTguOTA2OCAyNCAxMi4xOCAyNEM1LjQ1MzE3IDI0IDAgMTguNjI3NCAwIDEyWiIgaWQ9IkVsbGlwc2UiIGZpbGw9IiNGRjAwMDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSJub25lIiAvPiA8cGF0aCBkPSJNMCA3LjJDMCAzLjIyMzU1IDMuMjcxOSAwIDcuMzA4IDBDMTEuMzQ0MSAwIDE0LjYxNiAzLjIyMzU1IDE0LjYxNiA3LjJDMTQuNjE2IDExLjE3NjQgMTEuMzQ0MSAxNC40IDcuMzA4IDE0LjRDMy4yNzE5IDE0LjQgMCAxMS4xNzY0IDAgNy4yWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNC44NzIgNC44KSIgaWQ9IkVsbGlwc2UiIGZpbGw9IiNGRjAwMDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjEuMiIgLz4gPHBhdGggZD0iTTAgMTMuMjI5TDYuMzI3IDkuNjg1TDkuNTM2NzRlLTA3IDYuMTM5TDkuNTM2NzRlLTA3IDEzLjIyOUwwIDEzLjIyOVpNMjcuNjg5IDcuMzI2QzI3LjExIDEwLjE3OSAyNi42NyAxMy42NjIgMjYuNDM5IDE1LjFMMjYuMjc2IDE1LjFDMjYuMDg5IDEzLjYxOCAyNS42NDkgMTAuMTU4IDI1LjA0OSA3LjM1TDIzLjU2NiAwLjM2MUwxOS4wNDYgMC4zNjFMMTkuMDQ2IDE5LjIxMUwyMS44NDkgMTkuMjExTDIxLjg0OSAzLjY3MUwyMi4xMjYgNS4xMjJMMjQuOTc2IDE5LjIwOEwyNy43OCAxOS4yMDhMMzAuNTgzIDUuMTIyTDMwLjg4MyAzLjY2M0wzMC44ODMgMTkuMjFMMzMuNjg3IDE5LjIxTDMzLjY4NyAwLjM2TDI5LjEyNCAwLjM2TDI3LjY4OSA3LjMyNkwyNy42ODkgNy4zMjZaTTQxLjI2NiAxNi4zOEM0MS4wMSAxNi44OTcgNDAuNDU2IDE3LjI1NiAzOS44OTggMTcuMjU2QzM5LjI1IDE3LjI1NiAzOC45OTQgMTYuNzYyIDM4Ljk5NCAxNS41NUwzOC45OTQgNS40MzhMMzUuNzk2IDUuNDM4TDM1Ljc5NiAxNS43MjhDMzUuNzk2IDE4LjI2OCAzNi42NTIgMTkuNDM0IDM4LjU1NCAxOS40MzRDMzkuODUgMTkuNDM0IDQwLjg5MiAxOC44NzIgNDEuNjEyIDE3LjUyNUw0MS42ODIgMTcuNTI1TDQxLjk1OSAxOS4yMDlMNDQuNDYxIDE5LjIwOUw0NC40NjEgNS40MzlMNDEuMjYzIDUuNDM5TDQxLjI2MyAxNi4zNzlMNDEuMjY2IDE2LjM3OUw0MS4yNjYgMTYuMzhaTTUwLjY0OCAxMC44NzRDNDkuNjA1IDEwLjEzMiA0OC45NTcgOS42MzggNDguOTU3IDguNTZDNDguOTU3IDcuNzk3IDQ5LjMyNyA3LjM3IDUwLjIwNyA3LjM3QzUxLjExMiA3LjM3IDUxLjQxMyA3Ljk3NSA1MS40MzQgMTAuMDQ0TDU0LjEyMyA5LjkzM0M1NC4zMzEgNi41ODcgNTMuMTk1IDUuMTkzIDUwLjI1MyA1LjE5M0M0Ny41MiA1LjE5MyA0Ni4xNzUgNi4zODMgNDYuMTc1IDguODMxQzQ2LjE3NSAxMS4wNTUgNDcuMjg4IDEyLjA2NiA0OS4wOTUgMTMuMzkzQzUwLjY0OCAxNC41NjIgNTEuNTUyIDE1LjIxMyA1MS41NTIgMTYuMTU3QzUxLjU1MiAxNi44NzcgNTEuMDg4IDE3LjM3IDUwLjI3NyAxNy4zN0M0OS4zMjcgMTcuMzcgNDguNzcgMTYuNDkzIDQ4LjkxMiAxNC45NjVMNDYuMjAyIDE1LjAwOUM0NS43ODMgMTcuODYxIDQ2Ljk2OCAxOS41MjQgNTAuMTE3IDE5LjUyNEM1Mi44NzUgMTkuNTI0IDU0LjMxMiAxOC4yODggNTQuMzEyIDE1LjgxOEM1NC4zMDkgMTMuNTcxIDUzLjE1MiAxMi42NzEgNTAuNjQ4IDEwLjg3NEw1MC42NDggMTAuODc0Wk01OS4xMjggNS40MzhMNTYuMDY5IDUuNDM4TDU2LjA2OSAxOS4yMDhMNTkuMTI5IDE5LjIwOEw1OS4xMjkgNS40MzlMNTkuMTI4IDUuNDM4Wk01Ny42MjEgMEM1Ni40NDEgMCA1NS44ODMgMC40MjcgNTUuODgzIDEuOTExQzU1Ljg4MyAzLjQzOSA1Ni40MzcgMy44MiA1Ny42MjIgMy44MkM1OC44MjcgMy44MiA1OS4zNiAzLjQzNyA1OS4zNiAxLjkxMUM1OS4zNiAwLjQ5NyA1OC44MjcgMi4zODQxOWUtMDcgNTcuNjIxIDIuMzg0MTllLTA3TDU3LjYyMSAwWk02OS40MTQgMTQuMjQ0TDY2LjYxMSAxNC4xMDlDNjYuNjExIDE2LjUzNSA2Ni4zMzQgMTcuMzIxIDY1LjM4NSAxNy4zMjFDNjQuNDM1IDE3LjMyMSA2NC4yNzIgMTYuNDQ0IDY0LjI3MiAxMy41OTFMNjQuMjcyIDEwLjkyMUM2NC4yNzIgOC4xNTYgNjQuNDU5IDcuMjgyIDY1LjQwOSA3LjI4MkM2Ni4yODkgNy4yODIgNjYuNTIxIDguMTEyIDY2LjUyMSAxMC42NzVMNjkuMjk5IDEwLjQ5N0M2OS40ODYgOC4zNjMgNjkuMjA2IDYuOTAyIDY4LjM1IDYuMDcyQzY3LjcyMyA1LjQ2NCA2Ni43NzQgNS4xNzUgNjUuNDU0IDUuMTc1QzYyLjM1IDUuMTc1IDYxLjA3NSA2Ljc5MyA2MS4wNzUgMTEuMzI5TDYxLjA3NSAxMy4yNjFDNjEuMDc1IDE3LjkzNCA2Mi4xNjMgMTkuNDM5IDY1LjMzOSAxOS40MzlDNjYuNjgzIDE5LjQzOSA2Ny42MDkgMTkuMTY5IDY4LjIzNSAxOC41ODVDNjkuMTM3IDE3Ljc3MSA2OS40ODQgMTYuMzggNjkuNDE1IDE0LjI0NEw2OS40MTQgMTQuMjQ0WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOS43NDQgMi4zMTYpIiBpZD0iU2hhcGUiIGZpbGw9IiNGRkZGRkYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSJub25lIiAvPiA8L2c+IDwvZz4gPGcgaWQ9IkRlc2t0b3AiIGZpbGw9IiNGRkZGRkYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg0IC0xKSI+IDxwYXRoIGQ9Ik0yNi42NDY1IDI2LjgwMjdMMjYuNjQ2NSA2LjYzNjcyTDI4LjI3MzQgNi42MzY3MkwyOC4yNzM0IDE4Ljg3M0wyOC4zMjgxIDE4Ljg3M0wzMS41NTQ3IDEyLjI0MjJMMzMuMjIyNyAxMi4yNDIyTDI5Ljg0NTcgMTkuMTYwMkwzMy41OTE4IDI2LjgwMjdMMzEuNzczNCAyNi44MDI3TDI4LjMyODEgMTkuNjY2TDI4LjI3MzQgMTkuNjY2TDI4LjI3MzQgMjYuODAyN0wyNi42NDY1IDI2LjgwMjdaTTMuODY5MTQgNy40ODQzOFE2LjM1NzQyIDcuNDg0MzggNy40NjQ4NCA5Ljc0MDIzUTguNTcyMjcgMTEuOTk2MSA4LjU3MjI3IDE3LjE0MzZROC41NzIyNyAyMi4yOTEgNy40NjQ4NCAyNC41NDY5UTYuMzU3NDIgMjYuODAyNyAzLjg2OTE0IDI2LjgwMjdMMS4zOTQ1MyAyNi44MDI3TDEuMzk0NTMgNy40ODQzOEwzLjg2OTE0IDcuNDg0MzhaTTM4LjM3NyAyNy4wNzYyUTM5LjA3NDIgMjcuMDc2MiAzOS43MTY4IDI2LjgwMjdMMzkuNzE2OCAyNS4yNTc4UTM5LjE4MzYgMjUuNTcyMyAzOC42NTA0IDI1LjU3MjNRMzguMDA3OCAyNS41NzIzIDM3Ljc1NDkgMjUuMTk2M1EzNy41MDIgMjQuODIwMyAzNy41MDIgMjMuNzgxM0wzNy41MDIgMTMuNzA1MUwzOS42NjIxIDEzLjcwNTFMMzkuNjYyMSAxMi4yNDIyTDM3LjUwMiAxMi4yNDIyTDM3LjUwMiA4LjMxODM2TDM1Ljg4ODcgOC42MzI4MUwzNS44ODg3IDEyLjI0MjJMMzQuMDI5MyAxMi4yNDIyTDM0LjAyOTMgMTMuNzA1MUwzNS44ODg3IDEzLjcwNTFMMzUuODg4NyAyNFEzNS44ODg3IDI3LjA3NjIgMzguMzc3IDI3LjA3NjJaTTMuNzczNDQgMjUuMjMwNVE1LjQyNzczIDI1LjIzMDUgNi4xMzE4NCAyMy4zOTg0UTYuODM1OTQgMjEuNTY2NCA2LjgzNTk0IDE3LjE0MzZRNi44MzU5NCAxMi43MjA3IDYuMTMxODQgMTAuODg4N1E1LjQyNzczIDkuMDU2NjQgMy43NzM0NCA5LjA1NjY0TDMuMDc2MTcgOS4wNTY2NEwzLjA3NjE3IDI1LjIzMDVMMy43NzM0NCAyNS4yMzA1Wk0xNi45NjY4IDE5LjUyOTNMMTYuOTY2OCAxOS43NDhMMTIuMDAzOSAxOS43NDhRMTIuMDAzOSAyMy4wNTY2IDEyLjM3MyAyNC4zMTQ1UTEyLjc0MjIgMjUuNTcyMyAxMy43MTI5IDI1LjU3MjNRMTUuMDgwMSAyNS41NzIzIDE1LjI1NzggMjIuOTMzNkwxNi44NTc0IDIyLjkzMzZRMTYuNjkzNCAyNS4wNjY0IDE1LjkyMDkgMjYuMDcxM1ExNS4xNDg0IDI3LjA3NjIgMTMuNjg1NSAyNy4wNzYyUTExLjg2NzIgMjcuMDc2MiAxMS4wOTQ3IDI1LjM2MDRRMTAuMzIyMyAyMy42NDQ1IDEwLjMyMjMgMTkuNTIyNVExMC4zMjIzIDE1LjQwMDQgMTEuMDk0NyAxMy42ODQ2UTExLjg2NzIgMTEuOTY4OCAxMy42NTgyIDExLjk2ODhRMTUuNDQ5MiAxMS45Njg4IDE2LjIwOCAxMy42OTE0UTE2Ljk2NjggMTUuNDE0MSAxNi45NjY4IDE5LjUyOTNaTTIxLjU1MzcgMjcuMDc2MlEyMy4wOTE4IDI3LjA3NjIgMjMuOTA1MyAyNi4wOTg2UTI0LjcxODggMjUuMTIxMSAyNC43MTg4IDIzLjI0OFEyNC43MTg4IDIwLjY2NDEgMjIuMTc1OCAxOC42NTQzUTIwLjE3OTcgMTcuMDgyIDIwLjE3OTcgMTUuMzE4NFEyMC4xNzk3IDEzLjQ3MjcgMjEuNDkyMiAxMy40NzI3UTIyLjg0NTcgMTMuNDcyNyAyMi45NTUxIDE1Ljk4ODNMMjQuNTI3MyAxNS45ODgzUTI0LjM0OTYgMTEuOTY4OCAyMS40OTIyIDExLjk2ODhRMjAuMTI1IDExLjk2ODggMTkuMzM4OSAxMi44NzExUTE4LjU1MjcgMTMuNzczNCAxOC41NTI3IDE1LjM3M1ExOC41NjY0IDE3Ljk1NyAyMS4xMDk0IDE5Ljk2NjhRMjMuMDkxOCAyMS41MzkxIDIzLjA5MTggMjMuMzAyN1EyMy4xMDEzIDI0Ljg4NjEgMjIuMzc4OSAyNS4zNjQ4UTIyLjA2NTggMjUuNTcyMyAyMS42MTUyIDI1LjU3MjNRMjAuNzk0OSAyNS41NzIzIDIwLjQxODkgMjQuODc1UTIwLjA0MyAyNC4xNzc3IDE5Ljk4ODMgMjIuNDk2MUwxOC40MTYgMjIuNDk2MVExOC40NzA3IDI0LjkwMjMgMTkuMjQzMiAyNS45ODkzUTIwLjAxNTYgMjcuMDc2MiAyMS41NTM3IDI3LjA3NjJaTTQ3LjA2NTQgMjUuMzc0UTQ2LjMwNjYgMjcuMDc2MiA0NC40NjA5IDI3LjA3NjJRNDIuNjE1MiAyNy4wNzYyIDQxLjg2MzMgMjUuMzc0UTQxLjExMTMgMjMuNjcxOSA0MS4xMTEzIDE5LjUyMjVRNDEuMTExMyAxNS4zNzMgNDEuODYzMyAxMy42NzA5UTQyLjYxNTIgMTEuOTY4OCA0NC40NjA5IDExLjk2ODhRNDYuMzA2NiAxMS45Njg4IDQ3LjA2NTQgMTMuNjcwOVE0Ny44MjQyIDE1LjM3MyA0Ny44MjQyIDE5LjUyMjVRNDcuODI0MiAyMy42NzE5IDQ3LjA2NTQgMjUuMzc0Wk00OS45NzA3IDEyLjI0MjJMNDkuOTcwNyAzMS44NDc3TDUxLjU5NzcgMzEuODQ3N0w1MS41OTc3IDI1LjU3MjNMNTEuNjUyMyAyNS41NzIzUTUyLjI1MzkgMjcuMDc2MiA1My43MDMxIDI3LjA3NjJRNTUuMjM0NCAyNy4wNzYyIDU1LjkzODUgMjUuMjk4OFE1Ni42NDI2IDIzLjUyMTUgNTYuNjQyNiAxOS41MjI1UTU2LjY0MjYgMTUuNTIzNCA1NS45Mzg1IDEzLjc0NjFRNTUuMjM0NCAxMS45Njg4IDUzLjY5NjMgMTEuOTY4OFE1Mi4xNTgyIDExLjk2ODggNTEuNTQzIDEzLjc4NzFMNTEuNDg4MyAxMy43ODcxTDUxLjMxMDUgMTIuMjQyMkw0OS45NzA3IDEyLjI0MjJaTTEyLjAwMzkgMTguMjg1MkwxNS40MjE5IDE4LjI4NTJRMTUuMzY3MiAxNS41NjQ1IDE0Ljk5MTIgMTQuNTE4NlExNC42MTUyIDEzLjQ3MjcgMTMuNzE5NyAxMy40NzI3UTEyLjgyNDIgMTMuNDcyNyAxMi40NDE0IDE0LjUxODZRMTIuMDU4NiAxNS41NjQ1IDEyLjAwMzkgMTguMjg1MlpNNDMuMTQ4NCAyNC4yNjY2UTQzLjUxNzYgMjUuNTcyMyA0NC40Njc4IDI1LjU3MjNRNDUuNDE4IDI1LjU3MjMgNDUuNzgwMyAyNC4yNjY2UTQ2LjE0MjYgMjIuOTYwOSA0Ni4xNDI2IDE5LjUyMjVRNDYuMTQyNiAxNi4wODQgNDUuNzgwMyAxNC43NzgzUTQ1LjQxOCAxMy40NzI3IDQ0LjQ2NzggMTMuNDcyN1E0My41MTc2IDEzLjQ3MjcgNDMuMTQ4NCAxNC43NzgzUTQyLjc3OTMgMTYuMDg0IDQyLjc3OTMgMTkuNTIyNVE0Mi43NzkzIDIyLjk2MDkgNDMuMTQ4NCAyNC4yNjY2Wk01NC41NzgxIDI0LjE4NDZRNTQuMTk1MyAyNS41NzIzIDUzLjMzNCAyNS41NzIzUTUxLjU5NzcgMjUuNTcyMyA1MS41OTc3IDIwLjk1MTJMNTEuNTk3NyAxOC4wOTM4UTUxLjU5NzcgMTMuNDcyNyA1My4zMzQgMTMuNDcyN1E1NC4xOTUzIDEzLjQ3MjcgNTQuNTc4MSAxNC44NjA0UTU0Ljk2MDkgMTYuMjQ4IDU0Ljk2MDkgMTkuNTIyNVE1NC45NjA5IDIyLjc5NjkgNTQuNTc4MSAyNC4xODQ2WiIgLz4gPC9nPiA8L2c+IDwvc3ZnPg==";
 
-	console.log('Popup opened!');
+setTimeout(() => {
+    console.log("Updating logo");
+    const root = document.querySelector("#left-content > a");
+    const img = document.createElement("img");
+    img.src = "https://imgur.com/vsdHn8r.png";
+    root.appendChild(img);
+    img.onload = () => {
+        root.querySelector("picture:nth-child(1)").remove();
+    };
+    //img.src = "data:image/svg+xml;base64," + yt_music_d_icon;
+    //img.src = "https://imgur.com/vsdHn8r.png";
+    //img.currentSrc = "https://imgur.com/vsdHn8r.png";
+}, 1);
 
-	if (!settingsMenu) return;
+window.addEventListener("yt-popup-opened", () => {
+    const settingsMenu = document.querySelector(
+        "body > ytmusic-app > ytmusic-popup-container > tp-yt-iron-dropdown"
+    );
 
-	const settingSubcategory = settingsMenu.querySelector('#sections > yt-multi-page-menu-section-renderer:nth-child(2) > #items');
-	const settingsButton = settingSubcategory.querySelector('ytd-compact-link-renderer:nth-child(3)');
-	// console.log(generalButton.querySelector('yt-formatted-string').innerText);
+    console.log("Popup opened!");
 
-	// if (settingsButton.querySelector('#label').innerText !== 'Settings') return;
+    if (!settingsMenu) return;
 
-	const clientSettingsButton = settingsButton.cloneNode(true);
+    const settingSubcategory = settingsMenu.querySelector(
+        "#sections > yt-multi-page-menu-section-renderer:nth-child(2) > #items"
+    );
+    const settingsButton = settingSubcategory.querySelector(
+        "ytd-compact-link-renderer:nth-child(3)"
+    );
+    // console.log(generalButton.querySelector('yt-formatted-string').innerText);
 
-	settingSubcategory.insertBefore(clientSettingsButton, settingSubcategory.querySelector('ytd-compact-link-renderer:nth-child(4)'));
+    // if (settingsButton.querySelector('#label').innerText !== 'Settings') return;
 
-	clientSettingsButton.style.cursor = 'pointer';
+    const clientSettingsButton = settingsButton.cloneNode(true);
 
-	const clientSettingsButtonAnchorNode = clientSettingsButton.querySelector('a');
+    settingSubcategory.insertBefore(
+        clientSettingsButton,
+        settingSubcategory.querySelector("ytd-compact-link-renderer:nth-child(4)")
+    );
 
-	clientSettingsButtonAnchorNode.childNodes.forEach(e => {
-		clientSettingsButton.appendChild(e.cloneNode(true));
-	});
+    clientSettingsButton.style.cursor = "pointer";
 
-	clientSettingsButton.removeChild(clientSettingsButtonAnchorNode);
-	clientSettingsButton.querySelector('#label').innerHTML = 'Client Settings';
-	clientSettingsButton.querySelector('#label').classList.remove('is-empty');
-	clientSettingsButton.querySelector('#content-icon > yt-icon').innerHTML = icon;
+    const clientSettingsButtonAnchorNode = clientSettingsButton.querySelector("a");
 
-	clientSettingsButton.addEventListener('click', () => {
-		document.querySelector('html').click();
-		console.log('Client Settings clicked');
+    clientSettingsButtonAnchorNode.childNodes.forEach((e) => {
+        clientSettingsButton.appendChild(e.cloneNode(true));
+    });
 
-		window.api.request('settings-clicked', true);
-		// ipcRenderer.sendSync('settings-clicked', true);
-	});
+    clientSettingsButton.removeChild(clientSettingsButtonAnchorNode);
+    clientSettingsButton.querySelector("#label").innerHTML = "Client Settings";
+    clientSettingsButton.querySelector("#label").classList.remove("is-empty");
+    clientSettingsButton.querySelector("#content-icon > yt-icon").innerHTML = icon;
+
+    clientSettingsButton.addEventListener("click", () => {
+        document.querySelector("html").click();
+        console.log("Client Settings clicked");
+
+        window.api.request("settings-clicked", true);
+        // ipcRenderer.sendSync('settings-clicked', true);
+    });
 });
