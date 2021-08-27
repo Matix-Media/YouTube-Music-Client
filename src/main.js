@@ -52,7 +52,7 @@ function createSettingsWindow() {
     settingsWin = new BrowserWindow({
         width: 800,
         height: 700,
-        title: `YouTube Music - Settings - v${require("../package.json").version}`,
+        title: `Settings - YouTube Music - v${require("../package.json").version}`,
         webPreferences: {
             preload: path.join(process.cwd(), "src", "preload.js"),
         },
