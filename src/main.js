@@ -32,6 +32,10 @@ function executeJavaScript(code) {
     });
 }
 
+function isDev() {
+    return process.argv[2] == "--dev";
+}
+
 let win, settingsWin;
 const menuTemplate = [
     {
@@ -121,7 +125,7 @@ function createWindow() {
         // Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36
     });
 
-    // win.webContents.openDevTools();
+    if (isDev()) win.webContents.openDevTools();
 
     if (!config.continueWhereLeftOf) return;
 
