@@ -1,6 +1,6 @@
 {
     "name": "youtube_music_client",
-    "version": "1.1.11",
+    "version": "1.1.11b",
     "description": "YouTube Music Client with Discord RPC support",
     "main": "src/main.js",
     "scripts": {
