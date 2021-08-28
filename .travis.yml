@@ -45,5 +45,6 @@ deploy:
     file_glob: true
     file: "dist/YouTube Music*.{exe,AppImage,dmg,zip}"
     skip_cleanup: true
+    draft: true
     on:
         tags: true
